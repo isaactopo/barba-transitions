@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Top to Bottom — Barba.js + GSAP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script type="text/javascript">
+        window.addEventListener("load", function () {
+            document.querySelector('body').classList.add('loaded');
+        });
+    </script>
+    <style>
+        /* Init loader —evitamos salto inicial pre-carga— */
+        @keyframes hideLoader {
+            0% {
+                width: 100%;
+                height: 100%;
+            }
+
+            100% {
+                width: 0;
+                height: 0;
+            }
+        }
+
+        body>div.loader {
+            position: fixed;
+            background: #ffc6c8;
+            width: 100%;
+            height: 100%;
+            z-index: 1071;
+            opacity: 0;
+            transition: opacity .5s ease;
+            overflow: hidden;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body:not(.loaded)>div.loader {
+            opacity: 1;
+        }
+
+        body:not(.loaded) {
+            overflow: hidden;
+        }
+
+        body.loaded>div.loader {
+            animation: hideLoader .5s linear .5s forwards;
+        }
+
+        /* Typing Animation */
+        .loading-animation {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: typing 1s linear infinite alternate;
+            position: relative;
+            left: -12px;
+        }
+
+        @keyframes typing {
+            0% {
+                background-color: rgba(100, 100, 100, 1);
+                box-shadow: 12px 0px 0px 0px rgba(100, 100, 100, 0.2), 24px 0px 0px 0px rgba(100, 100, 100, 0.2);
+            }
+
+            25% {
+                background-color: rgba(100, 100, 100, 0.4);
+                box-shadow: 12px 0px 0px 0px rgba(100, 100, 100, 2), 24px 0px 0px 0px rgba(100, 100, 100, 0.2);
+            }
+
+            75% {
+                background-color: rgba(100, 100, 100, 0.4);
+                box-shadow: 12px 0px 0px 0px rgba(100, 100, 100, 0.2), 24px 0px 0px 0px rgba(100, 100, 100, 1);
+            }
+        }
+
+        /* Loading Screen —Cortina— */
+
+        .loading-screen {
+            position: relative;
+            padding-left: 0;
+            padding-right: 0;
+            padding-top: 0;
+            background: linear-gradient(90deg, rgba(251, 116, 103, 1) 0%, rgba(77, 1, 107, 1) 100%);
+            width: 0%;
+            height: 100%;
+        }
+
+        .logo-loader {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            opacity: 0
+        }
+
+        .load-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body data-barba="wrapper">
+    <div class="loader">
+        <div class="loading-animation"></div>
+    </div>
+    <div class="load-container">
+        <div class="loading-screen">
+            <div class="logo-loader">LOGO</div>
+        </div>
+    </div>
+    <main data-barba="container" data-barba-namespace="page1">
+        <div class="container">
+            <div>
+                <h1 class="fade-up">
+                    I'm transitioning, thanks!
+                </h1>
+                <a href="left-right1.html" class="fade-up">Page Transition</a>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap"></script>
+    <script>
+        function delay(n) {
+            n = n || 2000;
+            return new Promise((done) => {
+                setTimeout(() => {
+                    done();
+                }, n);
+            });
+        }
+
+        function pageTransition() {
+            var tl = gsap.timeline();
+            tl.to(".loading-screen", {
+                duration: 1.2,
+                width: "100%",
+                left: "0%",
+                ease: "Expo.easeInOut",
+            });
+
+            tl.to(".loading-screen", {
+                duration: 1,
+                width: "100%",
+                left: "100%",
+                ease: "Expo.easeInOut",
+                delay: 0.3,
+            });
+            tl.set(".loading-screen", {
+                left: "-100%"
+            });
+            gsap.to(".logo-loader", {
+                opacity: 1,
+                duration: 1,
+                delay: .4
+            });
+            gsap.set(".logo-loader", {
+                opacity: 0
+            });
+        }
+
+        function contentAnimation() {
+            var tl = gsap.timeline();
+
+            tl.from(".fade-up", {
+                duration: 1,
+                y: 30,
+                opacity: 0,
+                stagger: 0.3,
+                delay: 0.1
+            });
+        }
+
+        window.onload = function () {
+            barba.init({
+                sync: true,
+                transitions: [{
+                    async leave(data) {
+                        const done = this.async();
+
+                        pageTransition();
+                        await delay(1000);
+                        done();
+                    },
+
+                    async enter(data) {
+                        contentAnimation();
+                    },
+
+                    async once(data) {
+                        contentAnimation();
+                    },
+                }],
+            });
+            barba.hooks.enter(() => {
+                window.scrollTo(0, 0);
+            });
+        };
+    </script>
+
+</body>
+
+</html>
