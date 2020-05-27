@@ -6,4 +6,4 @@
 
 [Left to Right screen](https://isaactopo.github.io/barba-transitions/left-right1.html)
 
-[Initial code from](https://github.com/codegridweb/Page-Transition-Using-BarbaJS-And-GSAP)
+Initial code from @codegridweb
